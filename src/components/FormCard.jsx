@@ -3,9 +3,10 @@ import axios from 'axios';
 import { MousePointer2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import {toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Suspense } from 'react';
 
 const schema = z.object({
   name: z.string().min(1, 'Full name is required'),
@@ -15,7 +16,8 @@ const schema = z.object({
   gender: z.enum(['Male', 'Female', 'Other'], { errorMap: () => ({ message: 'Please select a gender' }) }),
 })
 
-const FormCard = () => {
+// ✅ Inner component uses useSearchParams — must be inside <Suspense>
+const FormCardInner = () => {
   const searchParams = useSearchParams();
   const dentistName = searchParams.get('dentist');
   const clinic_name = searchParams.get('clinic_name');
@@ -57,7 +59,6 @@ const FormCard = () => {
         </h3>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(handleSubmitForm)}>
-
           {fields.map(field => (
             <div key={field.name}>
               <label className="font-body" style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(26,26,24,0.5)', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
@@ -81,7 +82,6 @@ const FormCard = () => {
             </div>
           ))}
 
-          {/* Gender */}
           <div>
             <label className="font-body" style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(26,26,24,0.5)', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
               GENDER
@@ -89,12 +89,7 @@ const FormCard = () => {
             <div className="flex gap-6">
               {['Male', 'Female', 'Other'].map((option) => (
                 <label key={option} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value={option}
-                    className="w-5 h-5 text-black"
-                    {...register('gender')}
-                  />
+                  <input type="radio" value={option} className="w-5 h-5 text-black" {...register('gender')} />
                   <span style={{ fontSize: '15px', color: '#1A1A18', fontFamily: "'DM Sans', sans-serif" }}>
                     {option}
                   </span>
@@ -114,10 +109,18 @@ const FormCard = () => {
             {isSubmitting ? 'Booking...' : 'Confirm Booking'}
             <MousePointer2 />
           </button>
-
         </form>
       </div>
     </div>
+  );
+};
+
+// ✅ Outer component wraps the inner one in Suspense
+const FormCard = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FormCardInner />
+    </Suspense>
   );
 };
 
