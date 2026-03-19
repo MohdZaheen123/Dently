@@ -1,5 +1,5 @@
 const express = require('express')
-// const cors = require('cors')
+const cors = require('cors')
 const dbconnection= require('./database/connection')
 const dotenv = require('dotenv')
 const dentistRouter= require('./router/dentistRouter')
@@ -9,11 +9,9 @@ dotenv.config()
 
 dbconnection()
 const app=express();
-
-// app.get('/', (req, res) => {
-//     console.log("hello world")
-//   res.send('Hello World!')
-// })
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
 
 
 // app.use(cors);
